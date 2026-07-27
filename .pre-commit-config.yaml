@@ -1,0 +1,18 @@
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        language: node
+        additional_dependencies: [prettier@3.9.6]
+        entry: prettier --write --ignore-unknown --ignore-path .prettierignore
+        files: \.(js|json|md)$
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]

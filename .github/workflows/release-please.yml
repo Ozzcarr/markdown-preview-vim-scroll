@@ -1,0 +1,49 @@
+name: Release
+
+# Runs on every push to main. release-please maintains a "release PR" that
+# accumulates conventional commits into CHANGELOG.md and bumps the version in
+# package.json. Merging that PR publishes a GitHub Release and a `v<version>`
+# tag, which triggers the publish job below to push the extension to the
+# VS Code Marketplace.
+#
+# Requires a repository secret VSCE_PAT: an Azure DevOps Personal Access Token
+# for publisher "ozzcarr" with the Marketplace > Manage scope.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish to VS Code Marketplace
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Publish to Marketplace
+        run: npx --yes @vscode/vsce publish --no-dependencies
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
