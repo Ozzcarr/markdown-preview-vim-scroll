@@ -1,0 +1,12 @@
+.git/**
+.github/**
+.gitignore
+.vscodeignore
+.vscode/**
+node_modules/**
+*.vsix
+release-please-config.json
+.release-please-manifest.json
+.pre-commit-config.yaml
+.prettierignore
+CONTRIBUTING.md

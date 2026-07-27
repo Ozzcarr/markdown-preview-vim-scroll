@@ -1,0 +1,24 @@
+name: CI
+
+# Validates that the extension packages cleanly. Runs on PRs and pushes to main
+# so a broken manifest is caught before the release workflow tries to publish.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Package extension
+        run: npx --yes @vscode/vsce package --no-dependencies -o /tmp/extension.vsix
